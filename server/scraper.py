@@ -17,19 +17,20 @@ class Card:
         self.condition = condition
         self.quantity = quantity
         self.link = link
+    
+    def __str__(self):
+        return "ID: {0} NAME: {1} SET: {2} CONDITION: {3} PRICE: {4} QUANTITY: {5} LINK: {6}".format(
+            self.id, self.name, self.set, self.condition, self.price, self.quantity, self.link
+        )
+                
 
-def has_matching_data_name(form, target_data_name):
-    data_name = form.get('data-name', '').lower()
-    return data_name == target_data_name
-
-def fetch_product_prices(url, search_query):
+def fetch_product_prices(domain, search_query):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
     }
     
-    new_url = "https://www.{0}.com/products/search?q={1}&c=1".format(url, search_query)
+    new_url = "https://www.{0}.com/products/search?q={1}&c=1".format(domain, search_query)
 
-    print(new_url)
     # Send a GET request to the website
     response = requests.get(new_url, headers=headers)
  
@@ -39,53 +40,59 @@ def fetch_product_prices(url, search_query):
         return []
     
     # Parse the HTML content using BeautifulSoup
-    f = open("scraped_content.txt", "w")
-    f.write(response.content.decode("utf-8"))
-    f.close()   
-    
     soup = BeautifulSoup(response.content.decode("utf-8"), 'html.parser')
     list_items = soup.find_all('li', class_="product")
             
-    result = []
+    results = []
 
-    for l in list_items:
-        anchor = l.find('a')
+    for li in list_items:
+        # Get the first anchor tag. Any anchor should have an href property. 
+        anchor = li.find('a')
 
-        href = None
+        # This check to make sure the anchor exists is needed because Geek Fortress
+        # lists a product at the end of search results that does not have an anchor tag.
+        href = ""
         if anchor:
             href = anchor.get('href')
+        
+        outOfStock = li.find('div', class_="variant-row no-stock")
+        if outOfStock:
+            # Get id from last section of the href
+            tokens = href.split("/")
+            id = tokens[-1]
+
+            name = anchor.get('title')
+            set = li.find('span', class_="category").get_text()
+
+            # Add card to list of results.
+            card = Card(id, name, set, "Out of Stock", "Out of Stock", "Out of Stock", href)
+            results.append(card)
+            print(card)
+        else:
+            productDict = {}
+            availableProducts = li.find_all('form', class_='add-to-cart-form')
             
-        products = l.find_all('form', class_='add-to-cart-form')
+            for product in availableProducts:
+                id = product.get('data-id')
+                name = product.get('data-name')
+                price = product.get('data-price')
+                set = product.get('data-category')
+                condition = product.get('data-variant')
 
-        filtered_products = {}
-        for x in products:
-            id = x.get('data-id')
-            name = x.get('data-name')
-            price = x.get('data-price')
-            set = x.get('data-category')
-            condition = x.get('data-variant')
-
-            quantity = None
-            qty = x.find('input', class_='qty')
-            if qty:
+                # Get quantity from the properties of the input.
+                qty = product.find('input', class_='qty')
                 quantity = qty.get('max')
 
-            if id and price and name and set and condition and quantity and href:
-                filtered_products[id] = Card(id, name, set, price, condition, quantity, href)
+                productDict[id] = Card(id, name, set, price, condition, quantity, href)
 
-        for product in filtered_products:
-            print("ID:", filtered_products[product].id,
-                "NAME:", filtered_products[product].name,
-                "SET", filtered_products[product].set,
-                "CONDITION", filtered_products[product].condition,
-                "PRICE:", filtered_products[product].price,
-                "QUANTITY:", filtered_products[product].quantity,
-                "LINK:", filtered_products[product].link,
-            )
-            result.append(filtered_products[product])
+            # There could be multiple listings for the same card with different conditions.
+            for product in productDict:
+                print(productDict[product])
+                results.append(productDict[product])
 
-    return result
-        
+    return results
+
+# Test code    
 url = domains["GeekFortress"]  # Replace with the actual URL
 search_query = "Teferi"  # Replace with the product you're searching for
 
