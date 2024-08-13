@@ -9,13 +9,14 @@ domains = {
 }
 
 class Card:
-    def __init__(self, id, name, set, price, condition, quantity):
+    def __init__(self, id, name, set, price, condition, quantity, link):
         self.id = id
         self.name = name
         self.set = set
         self.price = price
         self.condition = condition
         self.quantity = quantity
+        self.link = link
 
 def has_matching_data_name(form, target_data_name):
     data_name = form.get('data-name', '').lower()
@@ -26,7 +27,7 @@ def fetch_product_prices(url, search_query):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
     }
     
-    new_url = "{0}?q={1}&c=1".format(url, search_query)
+    new_url = "https://www.{0}.com/products/search?q={1}&c=1".format(url, search_query)
 
     print(new_url)
     # Send a GET request to the website
@@ -43,34 +44,49 @@ def fetch_product_prices(url, search_query):
     f.close()   
     
     soup = BeautifulSoup(response.content.decode("utf-8"), 'html.parser')
-    products = soup.find_all('form', class_='add-to-cart-form')
+    list_items = soup.find_all('li', class_="product")
+            
+    result = []
 
-    filtered_products = {}
-    for x in products:
-        id = x.get('data-id')
-        name = x.get('data-name')
-        price = x.get('data-price')
-        set = x.get('data-category')
-        condition = x.get('data-variant')
+    for l in list_items:
+        anchor = l.find('a')
 
-        quantity = None
-        qty = x.find('input', class_='qty')
-        if qty:
-            quantity = qty.get('max')
+        href = None
+        if anchor:
+            href = anchor.get('href')
+            
+        products = l.find_all('form', class_='add-to-cart-form')
 
-        if id and price and name and set and condition and quantity:
-            filtered_products[id] = Card(id, name, set, price, condition, quantity)
+        filtered_products = {}
+        for x in products:
+            id = x.get('data-id')
+            name = x.get('data-name')
+            price = x.get('data-price')
+            set = x.get('data-category')
+            condition = x.get('data-variant')
 
-    for product in filtered_products:
-        print("ID:", filtered_products[product].id,
-            "NAME:", filtered_products[product].name,
-            "SET", filtered_products[product].set,
-            "CONDITION", filtered_products[product].condition,
-            "PRICE:", filtered_products[product].price,
-            "QUANTITY:", filtered_products[product].quantity)
+            quantity = None
+            qty = x.find('input', class_='qty')
+            if qty:
+                quantity = qty.get('max')
 
-# url = 'https://www.mugugames.com/products/search'  # Replace with the actual URL
-url = 'https://www.geekfortressgames.com/products/search'  # Replace with the actual URL
+            if id and price and name and set and condition and quantity and href:
+                filtered_products[id] = Card(id, name, set, price, condition, quantity, href)
+
+        for product in filtered_products:
+            print("ID:", filtered_products[product].id,
+                "NAME:", filtered_products[product].name,
+                "SET", filtered_products[product].set,
+                "CONDITION", filtered_products[product].condition,
+                "PRICE:", filtered_products[product].price,
+                "QUANTITY:", filtered_products[product].quantity,
+                "LINK:", filtered_products[product].link,
+            )
+            result.append(filtered_products[product])
+
+    return result
+        
+url = domains["GeekFortress"]  # Replace with the actual URL
 search_query = "Teferi"  # Replace with the product you're searching for
 
-fetch_product_prices(url, search_query)
+r = fetch_product_prices(url, search_query)

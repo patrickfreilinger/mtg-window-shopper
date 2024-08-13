@@ -86,7 +86,7 @@ Geek Fortress
 <!-- Latest jquery with fall back in case CDN is not available -->
 <script type="text/javascript">window.jQuery || document.write(unescape('%3Cscript%20type%3D%22text/javascript%22%20src%3D%22//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js%22%3E%3C/script%3E'))</script>
 <script type="text/javascript">window.jQuery || document.write('%3Cscript%20src%3D%22/javascripts/jquery-ui/js/jquery-1.7.1.min.js%22%3E%3C/script%3E')</script>
-<meta name="csrf-param" content="authenticity_token"><meta name="csrf-token" content="XQ5A6gCaXOlwYdO9DdqDN3WY9leFih4mpM7F7Iapg78=">
+<meta name="csrf-param" content="authenticity_token"><meta name="csrf-token" content="8a83JZy+xsEasjlnGBTBl/zdfuM/zeIigjYFbXUPrXA=">
 
 
 <link href="https://bluedefault.crystalcommerce.info/stylesheets/defaults.css?1723216219" media="screen" rel="stylesheet" type="text/css" />
@@ -432,7 +432,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         
 
-            <input type="text" name="q" class="search-field" value="Teferi">
+            <input type="text" name="q" class="search-field" value="teferi">
 
         
 
@@ -825,13 +825,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <i class="fa fa-angle-right"></i>
         </span>
 
-        <span class="current-crumb">Teferi</span>
+        <span class="current-crumb">teferi</span>
 
     
 
 </div>
 
-    <h1 class="page-title">Search results for "Teferi"</h1>
+    <h1 class="page-title">Search results for "teferi"</h1>
 
 
 
@@ -7961,20 +7961,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <span class="current">1</span>
 
         
-  <a href="/products/search?c=1&amp;page=2&amp;q=Teferi" rel="next">2</a>
+  <a href="/products/search?c=1&amp;page=2&amp;q=teferi" rel="next">2</a>
 
         
-  <a href="/products/search?c=1&amp;page=3&amp;q=Teferi">3</a>
+  <a href="/products/search?c=1&amp;page=3&amp;q=teferi">3</a>
 
         
-  <a href="/products/search?c=1&amp;page=4&amp;q=Teferi">4</a>
+  <a href="/products/search?c=1&amp;page=4&amp;q=teferi">4</a>
 
         
-  <a href="/products/search?c=1&amp;page=5&amp;q=Teferi">5</a>
+  <a href="/products/search?c=1&amp;page=5&amp;q=teferi">5</a>
 
         <span class="gap">&hellip;</span>
 
-    <a href="/products/search?c=1&amp;page=2&amp;q=Teferi" class="next_page" rel="next">Next &raquo;</a>
+    <a href="/products/search?c=1&amp;page=2&amp;q=teferi" class="next_page" rel="next">Next &raquo;</a>
 
   </div>
 
