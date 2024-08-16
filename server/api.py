@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from scraper import domains, fetch_product_prices
+from scraper import fetch_product_prices
 
 app = FastAPI()
 
@@ -20,10 +20,10 @@ app.add_middleware(
 
 @app.get("/mugu")
 async def search_mugu(query: str):
-    result = fetch_product_prices(domains["Mugu"], query)
+    result = fetch_product_prices("mugugames", query)
     return result
 
 @app.get("/gf")
 async def search_gf(query: str):
-    result = fetch_product_prices(domains["GeekFortress"], query)
+    result = fetch_product_prices("geekfortressgames", query)
     return result

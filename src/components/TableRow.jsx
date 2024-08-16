@@ -11,9 +11,10 @@ const TableRow = (props) => {
         <Table.Td>{props.condition}</Table.Td> {/* Condition */}
         <Table.Td>{props.price}</Table.Td> {/* Price */}
         <Table.Td>{props.quantity}</Table.Td> {/* Quantity */}
+        <Table.Td>{props.location}</Table.Td> {/* Location */}
         <Table.Td>
           <Button href={"https://mugugames.com" + props.link} target="_blank" as="a" variant="link" size="xs" icon >
-            <img src={linkImage}></img>
+            <img src={linkImage}/>
           </Button>
         </Table.Td> 
       </Table.Tr>

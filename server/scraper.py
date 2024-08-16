@@ -1,26 +1,27 @@
 import requests
 from bs4 import BeautifulSoup
 
-domains = {
-    "Mugu": "mugugames", # https://www.mugugames.com/products/search?q=teferi&c=1
-    "GeekFortress": "geekfortressgames", # https://www.geekfortressgames.com/products/search?q=teferi
-    "Zulus": "zulusgames", # https://zulusgames.com/search?page=1&q=%2Ateferi%2A
-    "StupidGeeks": "stupidgeeksinc" # https://stupidgeeksinc.com/search?type=product&options%5Bprefix%5D=last&q=teferi
+storeNames = {
+    "mugugames": "Mugu Games", # https://www.mugugames.com/products/search?q=teferi&c=1
+    "geekfortressgames": "Geek Fortress", # https://www.geekfortressgames.com/products/search?q=teferi
+    "zulusgames": "Zulu's", # https://zulusgames.com/search?page=1&q=%2Ateferi%2A
+    "stupidgeeksinc": "Stupid Geeks" # https://stupidgeeksinc.com/search?type=product&options%5Bprefix%5D=last&q=teferi
 }
 
 class Card:
-    def __init__(self, id, name, set, price, condition, quantity, link):
+    def __init__(self, id, name, set, price, condition, quantity, location, link):
         self.id = id
         self.name = name
         self.set = set
         self.price = price
         self.condition = condition
         self.quantity = quantity
+        self.location = location
         self.link = link
     
     def __str__(self):
-        return "ID: {0} NAME: {1} SET: {2} CONDITION: {3} PRICE: {4} QUANTITY: {5} LINK: {6}".format(
-            self.id, self.name, self.set, self.condition, self.price, self.quantity, self.link
+        return "ID: {0} NAME: {1} SET: {2} CONDITION: {3} PRICE: {4} QUANTITY: {5} LOCATION: {6} LINK: {7}".format(
+            self.id, self.name, self.set, self.condition, self.price, self.quantity, self.location, self.link
         )
                 
 
@@ -63,9 +64,10 @@ def fetch_product_prices(domain, search_query):
 
             name = anchor.get('title')
             set = li.find('span', class_="category").get_text()
+            location = storeNames[domain]
 
             # Add card to list of results.
-            card = Card(id, name, set, "Out of Stock", "Out of Stock", "Out of Stock", href)
+            card = Card(id, name, set, "Out of Stock", "Out of Stock", "Out of Stock", location, href)
             results.append(card)
             print(card)
         else:
@@ -83,7 +85,9 @@ def fetch_product_prices(domain, search_query):
                 qty = product.find('input', class_='qty')
                 quantity = qty.get('max')
 
-                productDict[id] = Card(id, name, set, price, condition, quantity, href)
+                location = storeNames[domain]
+
+                productDict[id] = Card(id, name, set, price, condition, quantity, location, href)
 
             # There could be multiple listings for the same card with different conditions.
             for product in productDict:
@@ -93,7 +97,7 @@ def fetch_product_prices(domain, search_query):
     return results
 
 # Test code    
-url = domains["GeekFortress"]  # Replace with the actual URL
-search_query = "Teferi"  # Replace with the product you're searching for
+url = "geekfortressgames"
+search_query = "Teferi"
 
 r = fetch_product_prices(url, search_query)
