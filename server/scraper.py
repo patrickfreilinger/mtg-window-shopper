@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from urllib.parse import quote_plus
 
 storeNames = {
     "mugugames": "Mugu Games", # https://www.mugugames.com/products/search?q=teferi&c=1
@@ -24,13 +25,19 @@ class Card:
             self.id, self.name, self.set, self.condition, self.price, self.quantity, self.location, self.link
         )
                 
-
 def fetch_product_prices(domain, search_query):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
     }
     
-    new_url = "https://www.{0}.com/products/search?q={1}&c=1".format(domain, search_query)
+    safe_query = quote_plus(search_query)
+    category = "1"
+    if domain == "mugugames":
+        category = "8" # Code for Magic singles on Mugu Games.
+    elif domain == "geekfortressgames":
+        category = "13362" # Code for Magic singles on Geek Fortress.
+
+    new_url = "https://www.{0}.com/advanced_search?utf8=%E2%9C%93&search%5Bfuzzy_search%5D={1}&search%5Bcategory_ids_with_descendants%5D%5B%5D={2}&search%5Bin_stock%5D=1&buylist_mode=0".format(domain, safe_query, category)
 
     # Send a GET request to the website
     response = requests.get(new_url, headers=headers)
