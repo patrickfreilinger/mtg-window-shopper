@@ -25,19 +25,20 @@ class Card:
             self.id, self.name, self.set, self.condition, self.price, self.quantity, self.location, self.link
         )
                 
-def fetch_product_prices(domain, search_query):
+def fetch_product_prices(domain, search_query, show_out_of_stock):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
     }
     
     safe_query = quote_plus(search_query)
     category = "1"
+
     if domain == "mugugames":
         category = "8" # Code for Magic singles on Mugu Games.
     elif domain == "geekfortressgames":
         category = "13362" # Code for Magic singles on Geek Fortress.
 
-    new_url = "https://www.{0}.com/advanced_search?utf8=%E2%9C%93&search%5Bfuzzy_search%5D={1}&search%5Bcategory_ids_with_descendants%5D%5B%5D={2}&search%5Bin_stock%5D=1&buylist_mode=0".format(domain, safe_query, category)
+    new_url = "https://www.{0}.com/advanced_search?utf8=%E2%9C%93&search%5Bfuzzy_search%5D={1}&search%5Bcategory_ids_with_descendants%5D%5B%5D={2}&search%5Bin_stock%5D={3}&buylist_mode=0".format(domain, safe_query, category, int(not show_out_of_stock))
 
     # Send a GET request to the website
     response = requests.get(new_url, headers=headers)
@@ -107,4 +108,4 @@ def fetch_product_prices(domain, search_query):
 url = "geekfortressgames"
 search_query = "Teferi"
 
-r = fetch_product_prices(url, search_query)
+r = fetch_product_prices(url, search_query, False)
