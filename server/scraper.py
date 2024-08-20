@@ -10,7 +10,7 @@ storeNames = {
 }
 
 class Card:
-    def __init__(self, id, name, set, price, condition, quantity, location, link):
+    def __init__(self, id, name, set, price, condition, quantity, location, link, image):
         self.id = id
         self.name = name
         self.set = set
@@ -19,10 +19,11 @@ class Card:
         self.quantity = quantity
         self.location = location
         self.link = link
+        self.image = image
     
     def __str__(self):
-        return "ID: {0} NAME: {1} SET: {2} CONDITION: {3} PRICE: {4} QUANTITY: {5} LOCATION: {6} LINK: {7}".format(
-            self.id, self.name, self.set, self.condition, self.price, self.quantity, self.location, self.link
+        return "ID: {0} NAME: {1} SET: {2} CONDITION: {3} PRICE: {4} QUANTITY: {5} LOCATION: {6} LINK: {7} IMAGE: {8}".format(
+            self.id, self.name, self.set, self.condition, self.price, self.quantity, self.location, self.link, self.image
         )
                 
 def fetch_product_prices(domain, search_query, show_out_of_stock, min_price, max_price):
@@ -73,9 +74,10 @@ def fetch_product_prices(domain, search_query, show_out_of_stock, min_price, max
             name = anchor.get('title')
             set = li.find('span', class_="category").get_text()
             location = storeNames[domain]
+            image = anchor.find('img').get('src')
 
             # Add card to list of results.
-            card = Card(id, name, set, "Out of Stock", "Out of Stock", "Out of Stock", location, href)
+            card = Card(id, name, set, "Out of Stock", "Out of Stock", "Out of Stock", location, href, image)
             results.append(card)
             print(card)
         else:
@@ -94,8 +96,9 @@ def fetch_product_prices(domain, search_query, show_out_of_stock, min_price, max
                 quantity = qty.get('max')
 
                 location = storeNames[domain]
+                image = anchor.find('img').get('src')
 
-                productDict[id + "-" + condition] = Card(id, name, set, price, condition, quantity, location, href)
+                productDict[id + "-" + condition] = Card(id, name, set, price, condition, quantity, location, href, image)
 
             # There could be multiple listings for the same card with different conditions.
             for product in productDict:

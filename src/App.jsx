@@ -491,6 +491,7 @@ const App = () => {
                 quantity={row.quantity}
                 location={row.location}
                 link={row.link}
+                image={row.image}
               ></TableRow>
             ))}
           </Table.Tbody>
