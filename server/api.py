@@ -19,11 +19,11 @@ app.add_middleware(
 )
 
 @app.get("/mugu")
-async def search_mugu(searchQuery: str, showOOS: bool):
-    result = fetch_product_prices("mugugames", searchQuery, showOOS)
+async def search_mugu(searchQuery: str, showOOS: bool, minPrice: str, maxPrice: str):
+    result = fetch_product_prices("mugugames", searchQuery, showOOS, minPrice, maxPrice)
     return result
 
 @app.get("/gf")
-async def search_gf(searchQuery: str, showOOS: bool):
-    result = fetch_product_prices("geekfortressgames", searchQuery, showOOS)
+async def search_gf(searchQuery: str, showOOS: bool, minPrice: str, maxPrice: str):
+    result = fetch_product_prices("geekfortressgames", searchQuery, showOOS, minPrice, maxPrice)
     return result

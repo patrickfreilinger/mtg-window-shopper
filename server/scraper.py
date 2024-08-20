@@ -25,7 +25,7 @@ class Card:
             self.id, self.name, self.set, self.condition, self.price, self.quantity, self.location, self.link
         )
                 
-def fetch_product_prices(domain, search_query, show_out_of_stock):
+def fetch_product_prices(domain, search_query, show_out_of_stock, min_price, max_price):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
     }
@@ -38,7 +38,7 @@ def fetch_product_prices(domain, search_query, show_out_of_stock):
     elif domain == "geekfortressgames":
         category = "13362" # Code for Magic singles on Geek Fortress.
 
-    new_url = "https://www.{0}.com/advanced_search?utf8=%E2%9C%93&search%5Bfuzzy_search%5D={1}&search%5Bcategory_ids_with_descendants%5D%5B%5D={2}&search%5Bin_stock%5D={3}&buylist_mode=0".format(domain, safe_query, category, int(not show_out_of_stock))
+    new_url = "https://www.{0}.com/advanced_search?utf8=%E2%9C%93&search%5Bfuzzy_search%5D={1}&search%5Bcategory_ids_with_descendants%5D%5B%5D={2}&search%5Bin_stock%5D={3}&buylist_mode=0&search%5Bsell_price_gte%5D={4}&search%5Bsell_price_lte%5D={5}".format(domain, safe_query, category, int(not show_out_of_stock), min_price, max_price)
 
     # Send a GET request to the website
     response = requests.get(new_url, headers=headers)
@@ -95,7 +95,7 @@ def fetch_product_prices(domain, search_query, show_out_of_stock):
 
                 location = storeNames[domain]
 
-                productDict[id] = Card(id, name, set, price, condition, quantity, location, href)
+                productDict[id + "-" + condition] = Card(id, name, set, price, condition, quantity, location, href)
 
             # There could be multiple listings for the same card with different conditions.
             for product in productDict:
@@ -105,7 +105,7 @@ def fetch_product_prices(domain, search_query, show_out_of_stock):
     return results
 
 # Test code    
-url = "geekfortressgames"
-search_query = "Teferi"
+url = "mugugames"
+search_query = "jace, architect of thought"
 
-r = fetch_product_prices(url, search_query, False)
+r = fetch_product_prices(url, search_query, False, "1.00", "5.00")
