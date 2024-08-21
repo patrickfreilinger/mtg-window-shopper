@@ -63,7 +63,7 @@ def fetch_product_prices(domain, search_query, show_out_of_stock, min_price, max
         # lists a product at the end of search results that does not have an anchor tag.
         href = ""
         if anchor:
-            href = anchor.get('href')
+            href = "https://" + domain + ".com" + anchor.get('href')
         
         outOfStock = li.find('div', class_="variant-row no-stock")
         if outOfStock:
@@ -107,8 +107,7 @@ def fetch_product_prices(domain, search_query, show_out_of_stock, min_price, max
 
     return results
 
-# Test code    
-url = "mugugames"
-search_query = "jace, architect of thought"
-
-r = fetch_product_prices(url, search_query, False, "1.00", "5.00")
+if __name__ == '__main__':
+    url = "mugugames"
+    search_query = "jace, architect of thought"
+    r = fetch_product_prices(url, search_query, False, "1.00", "5.00")

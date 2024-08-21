@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import "./App.css";
 import { Accordion, Checkbox, InputGroup, Table, Text } from "@rewind-ui/core";
 import axios from "axios";
+import debounce from "lodash.debounce";
 
 import TableRow from "./components/TableRow";
 import magnifyingGlass from "./assets/magnifying-glass.png";
@@ -139,6 +140,52 @@ const App = () => {
     return newTableData;
   };
 
+  function getMuguData(query) {
+    return axios({
+      url: "http://localhost:8000/mugu",
+      params: {
+        searchQuery: query,
+        showOOS: showOOS,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+      },
+    });
+  }
+
+  function getGFData(query) {
+    return axios({
+      url: "http://localhost:8000/gf",
+      params: {
+        searchQuery: query,
+        showOOS: showOOS,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+      },
+    });
+  }
+
+  function getZulusData(query) {
+    return axios({
+      url: "http://localhost:8000/zulus",
+      params: {
+        searchQuery: query,
+        showOOS: showOOS,
+      },
+    });
+  }
+
+  function getStoreData(store, query) {
+    return axios({
+      url: `http://localhost:8000/${store}`,
+      params: {
+        searchQuery: query,
+        showOOS: showOOS,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+      },
+    });
+  }
+
   async function getData(query) {
     try {
       setFetchingData(true);
@@ -147,40 +194,31 @@ const App = () => {
         noSelectedStores = true;
       }
 
-      let resultMugu = [];
+      let promises = [];
+
       if (selectedStores.includes("mugugames") || noSelectedStores) {
-        resultMugu = await axios({
-          url: "http://localhost:8000/mugu",
-          params: {
-            searchQuery: query,
-            showOOS: showOOS,
-            minPrice: minPrice,
-            maxPrice: maxPrice,
-          },
-        });
+        promises.push(getStoreData("mugu", query));
       }
 
-      let resultGF = [];
       if (selectedStores.includes("geekfortressgames") || noSelectedStores) {
-        resultGF = await axios({
-          url: "http://localhost:8000/gf",
-          params: {
-            searchQuery: query,
-            showOOS: showOOS,
-            minPrice: minPrice,
-            maxPrice: maxPrice,
-          },
-        });
+        promises.push(getStoreData("gf", query));
+      }
+
+      if (selectedStores.includes("zulusgames") || noSelectedStores) {
+        promises.push(getStoreData("zulus", query));
       }
 
       let data = [];
-      const results = [resultMugu, resultGF];
 
-      for (let i = 0; i < results.length; i++) {
-        if (results[i].data?.length > 0) {
-          data = data.concat(results[i].data.slice(0, maxResultsPerStore));
+      await Promise.all(promises).then((resolvedPromises) => {
+        for (let i = 0; i < resolvedPromises.length; i++) {
+          const result = resolvedPromises[i];
+
+          if (result.data?.length > 0) {
+            data = data.concat(result.data.slice(0, maxResultsPerStore));
+          }
         }
-      }
+      });
 
       const sortedData = sortData(sortBy, data, isOrderAscending);
 
@@ -194,8 +232,6 @@ const App = () => {
     }
   }
 
-  console.log(fetchingData);
-
   const handleSearchChange = (event) => {
     setSearchBarContent(event.target.value);
   };
@@ -203,6 +239,8 @@ const App = () => {
   const handleSearch = () => {
     getData(searchBarContent);
   };
+
+  const debouncedHandleSearch = debounce(handleSearch, 300);
 
   const handleSortByChange = (event) => {
     const newSortBy = event.target.value.toLowerCase();
@@ -237,6 +275,10 @@ const App = () => {
     setState(filteredValue);
   };
 
+  const createHandlePriceRangeChange = (setState) => (event) => {
+    handlePriceRangeChange(event, setState);
+  };
+
   const handlePriceRangeBlur = (event, state, setState) => {
     const regex = /^\$/; // Regular expression to match the leading dollar sign
     const value = event.target.value.replace(regex, "");
@@ -267,12 +309,12 @@ const App = () => {
     }
   };
 
-  const handleStoresChange = (event) => {
-    if (event) {
-      console.log(event.target.value);
-    }
+  const createHandlePriceRangeBlur = (state, setState) => (event) => {
+    handlePriceRangeBlur(event, state, setState);
+  };
 
-    console.log("hello");
+  const handleStoresChange = (event) => {
+    setSelectedStores(event || []);
   };
 
   const handleMaxResultsPerStoreChange = (event) => {
@@ -315,7 +357,7 @@ const App = () => {
             disabled={fetchingData}
             placeholder="Search for cards..."
           ></InputGroup.Input>
-          <InputGroup.Button onClick={handleSearch}>
+          <InputGroup.Button onClick={debouncedHandleSearch}>
             <img src={magnifyingGlass} />
           </InputGroup.Button>
         </InputGroup>
@@ -367,9 +409,7 @@ const App = () => {
                   <InputGroup.Combobox
                     placeholder="Select stores..."
                     multiple={true}
-                    onChange={(event) => {
-                      setSelectedStores(event ? event : []);
-                    }}
+                    onChange={handleStoresChange}
                   >
                     <InputGroup.Combobox.Option
                       value="mugugames"
@@ -402,23 +442,15 @@ const App = () => {
                   <InputGroup.Input
                     placeholder="Min price..."
                     value={minPrice ? `$${minPrice}` : ""}
-                    onChange={(event) =>
-                      handlePriceRangeChange(event, setMinPrice)
-                    }
-                    onBlur={(event) =>
-                      handlePriceRangeBlur(event, minPrice, setMinPrice)
-                    }
+                    onChange={createHandlePriceRangeChange(setMinPrice)}
+                    onBlur={createHandlePriceRangeBlur(minPrice, setMinPrice)}
                   />
                   <InputGroup.Text>To:</InputGroup.Text>
                   <InputGroup.Input
                     placeholder="Max price..."
                     value={maxPrice ? `$${maxPrice}` : ""}
-                    onChange={(event) =>
-                      handlePriceRangeChange(event, setMaxPrice)
-                    }
-                    onBlur={(event) =>
-                      handlePriceRangeBlur(event, maxPrice, setMaxPrice)
-                    }
+                    onChange={createHandlePriceRangeChange(setMaxPrice)}
+                    onBlur={createHandlePriceRangeBlur(maxPrice, setMaxPrice)}
                   />
                 </InputGroup>
               </div>
